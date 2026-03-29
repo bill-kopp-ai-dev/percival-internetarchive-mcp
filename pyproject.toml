@@ -1,0 +1,33 @@
+[build-system]
+requires = ["hatchling>=1.26.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "percival-internetarchive-mcp"
+version = "0.3.0"
+description = "Internet Archive MCP server wrapper optimized for Nanobot"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "fastmcp>=3.0.2",
+  "internetarchive>=5.8.0",
+]
+
+[project.scripts]
+percival-internetarchive-mcp = "percival_internetarchive_mcp.__main__:run"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/percival_internetarchive_mcp"]
+
+[dependency-groups]
+dev = [
+  "pytest>=8.3.0",
+  "pytest-asyncio>=0.24.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.uv.sources]
+internetarchive = { path = "internetarchive", editable = true }
