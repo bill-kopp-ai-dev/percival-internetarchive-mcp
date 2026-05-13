@@ -1,183 +1,80 @@
-# percival-internetarchive-mcp
+# 🤖 Percival Internet Archive - percival.OS MCP
 
-Security-focused MCP wrapper for Internet Archive, standardized with `uv + pyproject.toml + FastMCP`, and optimized for Nanobot workflows.
+**Version 0.0.2**
 
-## Project Origin
+[![Python](https://img.shields.io/badge/python-3.10+-yellow.svg)]()
+[![MCP](https://img.shields.io/badge/mcp-server-blue.svg)]()
+[![percival.OS](https://img.shields.io/badge/percival.OS-ecosystem-orange.svg)](https://github.com/bill-kopp-ai-dev/percival.OS)
 
-This project is built on top of the original Internet Archive Python project:
+## 📋 Description
+**Percival Internet Archive** is a security-focused MCP server for interacting with the Internet Archive. It enables the Nanobot agent to perform governed research and downloads of historical metadata and files.
 
-- Original upstream: https://github.com/jjjake/internetarchive
+This server is part of the **percival.OS** ecosystem, a Personal Agentic Operating System designed for autonomy, security, and absolute privacy.
 
-The upstream code is vendored under:
+---
 
-- `percival-internetarchive-mcp/internetarchive/`
+## 🛡️ percival.OS Principles
+Like all components of `percival.OS`, this MCP server strictly follows our core principles:
 
-Wrapper-specific MCP logic lives under:
+- **Privacy & Governance**: Downloads are permitted only to authorized directories within your infrastructure.
+- **Data Sovereignty**: The agent accesses historical knowledge without compromising the security of your local host.
+- **Hardened Security**: We implement security profiles (`dev`, `staging`, `prod`), destination governance, and prompt-injection mitigation for external content.
+- **Transparency**: Based on the original `internetarchive` project, but with stable MCP contracts and strict operational controls.
 
-- `percival-internetarchive-mcp/src/percival_internetarchive_mcp/`
+---
 
-This wrapper intentionally keeps upstream behavior isolated while adding MCP contracts, security guardrails, and operational controls for agent usage.
+## 🚀 Features & Tools
+The server offers the following tools for the agent:
 
-## What This Project Adds
+- `archive_search(query, limit=5)`: Search for items in the Internet Archive.
+- `archive_get_metadata(identifier)`: Obtain detailed metadata for an item.
+- `archive_download_file(identifier, filename, destination_dir, ...)`: Securely download a file to an allowed directory.
+- `archive_get_status()`: Check server operational status.
+- `archive_reload_config()`: Reload environment configurations.
+- `archive_get_security_posture()`: Expose the server's security compliance status.
 
-### Nanobot-First Optimization
+---
 
-- Stable JSON envelope contract for all tools: `ok`, `data`, `error`, `meta`
-- Direct-to-destination downloads (no intermediate server-local download folder)
-- Explicit truncation metadata for large payloads (`limits`, `files_truncated`, `text_truncations`)
-- Runtime observability tools for agent decision loops:
-  - `get_server_status()`
-  - `reload_runtime_config()`
-  - `get_security_posture()`
-
-### Security Hardening
-
-- Profile-driven security policy (`dev`, `staging`, `prod`)
-- Fail-closed destination governance with allowlist enforcement
-- Auth requirement gates for strict profiles
-- Error detail redaction and exception logging hygiene
-- Prompt-injection mitigation markers for untrusted external content
-- Rollout-phase enforcement with strict `phase2` security posture checks
-
-### MCP Standardization
-
-- `FastMCP` server implementation
-- `pyproject.toml` packaging and script entrypoint
-- `uv` workflow and lockfile
-- Compatibility shims controlled by rollout flags
-
-## Tool Surface
-
-- `search_archive(query, limit=5)`
-- `get_archive_metadata(identifier)`
-- `download_archive_file(identifier, filename, destination_dir, destination_filename="", overwrite=false)`
-- `get_server_status()`
-- `reload_runtime_config()`
-- `get_security_posture()`
-
-Compatibility resource (phase-dependent):
-
-- `archive://{identifier}/metadata`
-
-## Shared Virtual Environment Model
-
-This server is designed to run from the shared workspace environment:
-
-- Shared environment: `percival.OS_Dev/.venv`
-- No server-local `.venv` required
-
-Install into the shared environment (editable mode):
-
-```bash
-UV_CACHE_DIR=/tmp/uv-cache uv pip install \
-  --python /home/bill-kopp/Documents/percival.OS/percival.OS_Dev/.venv/bin/python \
-  -e /home/bill-kopp/Documents/percival.OS/percival.OS_Dev/mcp_servers/percival-internetarchive-mcp
-```
-
-Run the server:
-
-```bash
-/home/bill-kopp/Documents/percival.OS/percival.OS_Dev/.venv/bin/percival-internetarchive-mcp
-```
-
-## Nanobot Integration Example
+## ⚙️ Configuration in percival.OS (Nanobot)
+Add the following configuration to your `~/.nanobot/config.json`:
 
 ```json
 {
-  "mcpServers": {
-    "percival-internetarchive": {
-      "command": "/home/bill-kopp/Documents/percival.OS/percival.OS_Dev/.venv/bin/percival-internetarchive-mcp",
-      "env": {
-        "MCP_LOG_LEVEL": "INFO",
-        "IA_MCP_SECURITY_PROFILE": "prod",
-        "IA_MCP_ALLOWED_DOWNLOAD_DIRS": "/home/bill-kopp/Documents/percival.OS/downloads",
-        "IA_MCP_ROLLOUT_PHASE": "phase1"
+  "tools": {
+    "mcpServers": {
+      "percival-internetarchive": {
+        "command": "/path/to/percival.OS_Dev/.venv/bin/percival-internetarchive-mcp",
+        "env": {
+          "IA_MCP_SECURITY_PROFILE": "prod",
+          "IA_MCP_ALLOWED_DOWNLOAD_DIRS": "/path/to/authorized/downloads",
+          "IA_MCP_ROLLOUT_PHASE": "phase1"
+        }
       }
     }
   }
 }
 ```
 
-## Security Controls
+---
 
-### Security Profiles
+## 🛠️ Development & Testing
+This server utilizes the shared `percival.OS_Dev` virtual environment.
 
-- `IA_MCP_SECURITY_PROFILE=dev|staging|prod`
-- `staging` and `prod` default to strict behavior:
-  - `require_auth=true`
-  - `require_allowed_download_dirs=true`
-  - `debug_error_details=false`
-  - `log_exception_details=false`
+```bash
+# Editable installation in the shared venv
+uv pip install -e ./mcp_servers/percival-internetarchive-mcp
 
-### Download Governance
-
-- `IA_MCP_ALLOWED_DOWNLOAD_DIRS`
-- `IA_MCP_FORBIDDEN_DOWNLOAD_DIRS`
-- `IA_MCP_MAX_DOWNLOAD_BYTES`
-- `IA_MCP_DOWNLOAD_TIMEOUT_SECONDS`
-
-### Prompt-Injection and Output Safety
-
-- External content is marked as untrusted in tool metadata
-- Untrusted text is sanitized/normalized before returning
-- Metadata/file payloads are bounded and truncation is explicit
-
-### Runtime Compliance Gates
-
-- `reload_runtime_config()` may return:
-  - `AUTH_REQUIRED`
-  - `SECURITY_POSTURE_NON_COMPLIANT`
-- `get_security_posture()` exposes check-level compliance for rollout preflight
-
-## Rollout Model
-
-- `phase0`: compatibility-first
-- `phase1`: default balanced mode
-- `phase2`: strict mode (legacy compatibility disabled)
-
-Environment flags:
-
-- `IA_MCP_ROLLOUT_PHASE`
-- `IA_MCP_COMPAT_RESOURCE_ENABLED`
-- `IA_MCP_LEGACY_SHIMS_ENABLED`
-- `IA_MCP_ALLOW_EMPTY_DESTINATION`
-- `IA_MCP_DEFAULT_DOWNLOAD_DIR`
-
-## Response Contract
-
-Success:
-
-```json
-{
-  "ok": true,
-  "data": {},
-  "error": null,
-  "meta": {
-    "tool": "tool_name",
-    "request_id": "...",
-    "duration_ms": 12.34
-  }
-}
+# Execution
+uv run percival-internetarchive-mcp
 ```
 
-Error:
+---
 
-```json
-{
-  "ok": false,
-  "data": null,
-  "error": {
-    "code": "ERROR_CODE",
-    "message": "Human readable message"
-  },
-  "meta": {
-    "tool": "tool_name"
-  }
-}
-```
+## 📚 About the Project
+This server is an integral module of the **percival.OS** project. It provides a secure interface for historical research and data retrieval.
 
-## Additional Documentation
+- **Main Repository**: [https://github.com/bill-kopp-ai-dev/percival.OS](https://github.com/bill-kopp-ai-dev/percival.OS)
+- **License**: MIT
 
-- [SECURITY.md](SECURITY.md)
-- [ROLLOUT.md](ROLLOUT.md)
-- [MIGRATION.md](MIGRATION.md)
+---
+*Developed with ❤️ by the percival.OS Team*

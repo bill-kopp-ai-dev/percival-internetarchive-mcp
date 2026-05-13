@@ -193,7 +193,7 @@ if COMPAT_RESOURCE_REGISTERED:
     mcp.resource("archive://{identifier}/metadata")(archive_metadata_resource)
 
 
-@mcp.tool()
+@mcp.tool("archive_search")
 def search_archive(query: str, limit: int = 5) -> str:
     """Search Internet Archive and return compact item records.
 
@@ -220,7 +220,7 @@ def search_archive(query: str, limit: int = 5) -> str:
     return _to_json(payload)
 
 
-@mcp.tool()
+@mcp.tool("archive_get_metadata")
 def get_archive_metadata(identifier: str) -> str:
     """Get metadata and file list for one Internet Archive identifier.
 
@@ -245,7 +245,7 @@ def get_archive_metadata(identifier: str) -> str:
     return _to_json(payload)
 
 
-@mcp.tool()
+@mcp.tool("archive_download_file")
 def download_archive_file(
     identifier: str,
     filename: str,
@@ -286,7 +286,7 @@ def download_archive_file(
     return _to_json(payload)
 
 
-@mcp.tool()
+@mcp.tool("archive_get_status")
 def get_server_status() -> str:
     """Return runtime health snapshot for orchestration and diagnostics.
 
@@ -321,7 +321,7 @@ def get_server_status() -> str:
     return _to_json(payload)
 
 
-@mcp.tool()
+@mcp.tool("archive_reload_config")
 def reload_runtime_config() -> str:
     """Reload environment-driven runtime config and re-evaluate compliance.
 
@@ -390,7 +390,7 @@ def reload_runtime_config() -> str:
     return _to_json(payload)
 
 
-@mcp.tool()
+@mcp.tool("archive_get_security_posture")
 def get_security_posture() -> str:
     """Return evaluated runtime security posture checks.
 
